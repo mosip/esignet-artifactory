@@ -1,4 +1,4 @@
-# Artifactory
+# eSignet-artifactory
 
 ## Install
 ```sh
