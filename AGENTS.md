@@ -94,8 +94,11 @@ mvn dependency:resolve
 
 ## Development Workflow
 
-1. Branch from `develop` (the active integration branch used by CI and the
-   `deploy/install.sh` default chart tag).
+1. Branch from `develop` (the active integration branch used by CI).
+   `deploy/install.sh` defaults to Helm chart version `0.0.1-develop`
+   (`--version $CHART_VERSION`) and, separately, Docker image tag
+   `develop` (`--set image.tag=develop`) — these are two different
+   values, not one "chart tag".
 2. If adding or updating a static asset (i18n JSON, theme CSS, image), place
    it under the matching `artifacts/src/...` directory and update
    `configure.sh` only if you are introducing a new bundle/zip, not just
@@ -126,9 +129,14 @@ mvn dependency:resolve
   downloads prebuilt JARs, it does not compile anything.
 - Artifact JARs referenced in `artifacts/pom.xml` (mock wrapper, IDA wrapper,
   digital credential wrapper, identity plugin, mock plugin) are built in
-  *other* MOSIP repos; version bumps here must correspond to an actual
-  published release of those artifacts on Maven Central/OSSRH, or the Docker
-  build will fail to resolve the dependency.
+  *other* MOSIP repos; version bumps here must resolve, or the Docker build
+  will fail to resolve the dependency. The check differs by version type:
+  a plain release version (e.g. `1.3.0`) must exist in the configured
+  release repository, while a `-SNAPSHOT` version (e.g. `1.3.0-SNAPSHOT`,
+  used by `esignet-mock-plugin` and `mosip-identity-plugin` as of this
+  writing) must exist in the `ossrh` **snapshot** repository declared in
+  `<distributionManagement>`/`<repositories>` — it will never be on Maven
+  Central, so checking Central for a snapshot coordinate proves nothing.
 - `deploy/*.sh` scripts assume `kubectl` and `helm` are installed and that a
   `mosip` Helm repo is already added (`helm repo update` is called, but not
   `helm repo add`).
@@ -140,8 +148,10 @@ mvn dependency:resolve
 
 ### Do
 
-1. Verify any artifact version bump against the actual released version of
-   the upstream JAR before editing `artifacts/pom.xml`.
+1. Verify any artifact version bump against the actual published
+   coordinate before editing `artifacts/pom.xml`: check the release
+   repository for a plain version, or the snapshot repository (not
+   Maven Central) for a `-SNAPSHOT` version.
 2. Keep new static assets under the correct `artifacts/src/{i18n,theme,image}`
    subdirectory, matching the existing per-module layout.
 3. Run `docker build` locally when changing `Dockerfile`, `configure.sh`, or
