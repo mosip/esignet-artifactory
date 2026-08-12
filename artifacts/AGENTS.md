@@ -62,9 +62,11 @@ mirrors the current release and 404s for an archived version like
 releases); and the downloaded archive is `tar`-extracted with no
 checksum/signature verification, so a compromised mirror or
 man-in-the-middle could substitute a tampered Maven distribution before
-it ever runs. Both are known, deliberately left as-is for now — don't
-"fix" this Dockerfile line without confirming with a maintainer first,
-since it's been touched and reverted before. Defines the working paths
+it ever runs. There is no formal tracked security exception (owner/review-date) for
+this — it's simply been touched and reverted before in this repo's
+history, so treat it as a deliberate maintainer choice, not an
+oversight: confirm with a maintainer before changing this line rather
+than "fixing" it unilaterally. Defines the working paths
 as `ENV` vars
 (`base_path=/usr/share/nginx/html/artifactory`, plus
 `cache_path`/`mosip_plugins_zip_path`/`i18n_zip_path`/`theme_zip_path`/
