@@ -71,7 +71,7 @@ mvn dependency:resolve
 
 ## Project Structure Notes
 
-- `artifacts/` — Docker build context.
+- `artifacts/` — Docker build context (see [`artifacts/AGENTS.md`](artifacts/AGENTS.md)).
   - `Dockerfile` — builds the nginx image, resolves Maven artifacts, runs
     `configure.sh`.
   - `pom.xml` — declares which JARs to download and where to place them.
@@ -87,8 +87,7 @@ mvn dependency:resolve
   - `src/mosip-plugins/sign-in-with-esignet/` — a prebuilt plugin zip that is
     copied into the image as-is (not built from source here).
 - `deploy/` — Helm-based install/restart/delete scripts and a short
-  `deploy/README.md`. No subfolder `AGENTS.md` exists here; this root file
-  covers both directories since neither has independent build/test tooling.
+  `deploy/README.md` (see [`deploy/AGENTS.md`](deploy/AGENTS.md)).
 - `.github/workflows/push-trigger.yml` — the only CI workflow; triggers a
   Docker image build/publish via the shared `mosip/kattu` workflow.
 
