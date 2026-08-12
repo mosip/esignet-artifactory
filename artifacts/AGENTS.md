@@ -7,8 +7,9 @@ Parent guide: [`../AGENTS.md`](../AGENTS.md)
 The Docker build context that produces the `esignet-artifactory-server`
 image: an nginx server pre-loaded with wrapper/plugin JARs and static
 i18n/theme/image assets that eSignet deployments fetch at runtime. This
-is the entire repository's actual content — `../deploy/` only installs
-the image this folder builds.
+folder contains the packaged artifact content; `../deploy/` installs,
+restarts, and deletes the Helm release for the image this folder
+builds (see `../deploy/AGENTS.md`).
 
 ## Layout
 
@@ -53,8 +54,18 @@ verifying release vs. snapshot coordinates before doing so.
 ## `Dockerfile`
 
 `FROM nginx@<digest>` (pinned), then: installs `openjdk-11-jdk` +
-`unzip`/`wget`/`zip`, downloads Maven 3.8.8, creates a non-root
-`container_user`. Defines the working paths as `ENV` vars
+`unzip`/`wget`/`zip`, downloads Maven 3.8.8 via `wget`, creates a
+non-root `container_user`. **The Maven download has two known,
+unaddressed issues**: it's fetched from `dlcdn.apache.org`, which only
+mirrors the current release and 404s for an archived version like
+3.8.8 (`archive.apache.org` is the correct permanent host for old
+releases); and the downloaded archive is `tar`-extracted with no
+checksum/signature verification, so a compromised mirror or
+man-in-the-middle could substitute a tampered Maven distribution before
+it ever runs. Both are known, deliberately left as-is for now — don't
+"fix" this Dockerfile line without confirming with a maintainer first,
+since it's been touched and reverted before. Defines the working paths
+as `ENV` vars
 (`base_path=/usr/share/nginx/html/artifactory`, plus
 `cache_path`/`mosip_plugins_zip_path`/`i18n_zip_path`/`theme_zip_path`/
 `image_zip_path`/`esignet_wrapper_lib_zip_path`, all derived from

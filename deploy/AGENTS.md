@@ -21,14 +21,18 @@ deploy/
 ## Script details
 
 - **`install.sh`** — usage: `./install.sh [kubeconfig]`. Creates the
-  `esignet` namespace, labels it for Istio sidecar injection
+  `esignet` namespace (**before** any error-handling options are set —
+  see below), labels it for Istio sidecar injection
   (`istio-injection=enabled` — note this differs from some other MOSIP
   repos' `deploy/install.sh`, which set `disabled`; check the actual
   script rather than assuming a repo-wide convention), then `helm
   install`s `mosip/artifactory` pinned to `CHART_VERSION=0.0.1-develop`
   with `--set image.repository=mosipdev/esignet-artifactory-server
-  --set image.tag=develop`. All `set -e`/`set -o nounset`/
-  `set -o pipefail` — any missing var or failed step aborts the script.
+  --set image.tag=develop`. `set -e`/`set -o nounset`/`set -o pipefail`
+  are only enabled **after** the `kubectl create ns $NS` line — a
+  failure in that first namespace-creation step does not trigger
+  `errexit` and the script continues; everything from `helm repo
+  update` onward is genuinely fail-fast.
 - **`restart.sh`** — usage: `./restart.sh [kubeconfig]`. Runs
   `kubectl rollout restart deploy` across the **whole `esignet`
   namespace** (not scoped to just the artifactory deployment), then
